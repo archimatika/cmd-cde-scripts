@@ -7,7 +7,6 @@ echo Looking for existing W: drive...
 set drive_id=""
 set drive_type=""
 set drive_name=""
-set google_id=""
 for /f "skip=1 tokens=*" %%a in ('wmic logicaldisk get deviceid^, drivetype^, volumename') do (
     for /f "tokens=1-4" %%b in ("%%a") do (
 	    if "%%b"=="W:" (
@@ -15,9 +14,6 @@ for /f "skip=1 tokens=*" %%a in ('wmic logicaldisk get deviceid^, drivetype^, vo
 		    set "drive_id=%%b"
 		    set "drive_type=%%c"
 		    set "drive_name=%%d %%e"
-	    )
-	    if "%%b"=="G:" (
-		    set "google_id=%%b"
 	    )
 	)
 )
@@ -35,15 +31,25 @@ if not %drive_id% == "" (
 	echo No drive W: found
 )
 
-rem connecting google drive shared disks
+rem connecting to server storage with vpn
 
 echo.
-echo Establishing Google Drive connection...
-if not %google_id% == "" (
-	subst W: "G:\Shared drives"
-	timeout /t 5 /nobreak > NUL
-	echo Connected successfully
+echo Establishing server vpn connection...
+
+set "net_status="
+set "net_name="
+for /f "tokens=*" %%c in ('rasdial') do (
+    if "%%c"=="Connected to" (
+        set "net_status=Connected"
+    )
+    if "%%c"=="Archimatika" (
+        set "net_name=%%c"
+    )  
+)
+
+if defined net_status (
+	net use W: \\archimatika.local\public\work
+	timeout /t 3 /nobreak > NUL
 ) else (
-	echo Can't find any google drive on G:, aborted
-	pause
+	echo No VPN connection found, aborted
 )
