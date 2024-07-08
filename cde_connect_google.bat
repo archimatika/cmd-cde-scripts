@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+chcp 65001 >nul
 
 rem check if W: has been used, delete and reconnect as new instance
 
@@ -40,7 +41,7 @@ if not %drive_id% == "" (
 rem connecting google drive shared disks
 
 echo.
-echo Establishing Google Drive connection...
+echo Try to establish Google Drive connection...
 
 set "share_path[0]=G:\Shared drives"
 set "share_path[1]=G:\Спільні диски"
@@ -48,13 +49,19 @@ set "share_path[2]=G:\Общие диски"
 
 if not %google_id% == "" (
  	for /L %%s in (0,1,2) do (
-	    if exist !share_path[%%s]! (
+	    if exist "!share_path[%%s]!" (
 	    	subst W: "!share_path[%%s]!"
-	    	timeout /t 5 /nobreak > NUL
+	    	timeout /t 4 /nobreak > NUL
+		echo Drive disk was found on G:\ and could be mounted
+		timeout /t 3 /nobreak > NUL
 	    	echo "!share_path[%%s]!" connected successfully
+	    	timeout /t 2 /nobreak > NUL
 	    )
 	)
 ) else (
 	echo Can't find any google drive on G:, aborted
-	pause
 )
+
+chcp 850 >nul
+
+pause
