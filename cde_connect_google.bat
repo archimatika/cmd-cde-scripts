@@ -4,10 +4,12 @@ setlocal enabledelayedexpansion
 rem check if W: has been used, delete and reconnect as new instance
 
 echo Looking for existing W: drive...
+
 set drive_id=""
 set drive_type=""
 set drive_name=""
 set google_id=""
+
 for /f "skip=1 tokens=*" %%a in ('wmic logicaldisk get deviceid^, drivetype^, volumename') do (
     for /f "tokens=1-4" %%b in ("%%a") do (
 	    if "%%b"=="W:" (
@@ -39,10 +41,19 @@ rem connecting google drive shared disks
 
 echo.
 echo Establishing Google Drive connection...
+
+set "share_path[0]=G:\Shared drives"
+set "share_path[1]=G:\Спільні диски"
+set "share_path[2]=G:\Общие диски"
+
 if not %google_id% == "" (
-	subst W: "G:\Shared drives"
-	timeout /t 5 /nobreak > NUL
-	echo Connected successfully
+ 	for /L %%s in (0,1,2) do (
+	    if exist !share_path[%%s]! (
+	    	subst W: "!share_path[%%s]!"
+	    	timeout /t 5 /nobreak > NUL
+	    	echo "!share_path[%%s]!" connected successfully
+	    )
+	)
 ) else (
 	echo Can't find any google drive on G:, aborted
 	pause
